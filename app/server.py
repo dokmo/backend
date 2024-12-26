@@ -12,12 +12,12 @@ from core.fastapi.middlewares import ResponseLogMiddleware
 from core.fastapi.middlewares.sqlalchemy import SQLAlchemyMiddleware
 
 
-def init_routers(app: FastAPI) -> None:
-    app.include_router(router=root_router)
+def init_routers(_app: FastAPI) -> None:
+    _app.include_router(router=root_router)
 
 
-def init_exception_handlers(app: FastAPI) -> None:
-    app.add_exception_handler(CustomException, custom_exception_handler)
+def init_exception_handlers(_app: FastAPI) -> None:
+    _app.add_exception_handler(CustomException, custom_exception_handler)
 
 
 def init_middleware() -> List[Middleware]:
@@ -36,7 +36,7 @@ def init_middleware() -> List[Middleware]:
 
 
 def init_app() -> FastAPI:
-    app = FastAPI(
+    _app = FastAPI(
         title="Python MicroService App",
         description="Microservice templates",
         version="0.0.1",
@@ -45,8 +45,8 @@ def init_app() -> FastAPI:
         dependencies=[Depends(Logging)],
         middleware=init_middleware()
     )
-    init_routers(app=app)
-    init_exception_handlers(app=app)
-    return app
+    init_routers(_app=_app)
+    init_exception_handlers(_app=_app)
+    return _app
 
 app = init_app()
