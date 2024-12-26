@@ -5,11 +5,11 @@ from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
 from api.root_router import root_router
-from app.core.exception.error_base import CustomException
-from app.core.exception.exception_handlers import custom_exception_handler
-from app.core.fastapi.logging import Logging
-from app.core.fastapi.middlewares import ResponseLogMiddleware
-from app.core.fastapi.middlewares.sqlalchemy import SQLAlchemyMiddleware
+from core.exception.error_base import CustomException
+from core.exception.exception_handlers import custom_exception_handler
+from core.fastapi.logging import Logging
+from core.fastapi.middlewares import ResponseLogMiddleware
+from core.fastapi.middlewares.sqlalchemy import SQLAlchemyMiddleware
 
 
 def init_routers(app: FastAPI) -> None:

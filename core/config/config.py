@@ -2,8 +2,8 @@ import os
 
 from pydantic.v1 import BaseSettings
 
-from app.core.exception.configuration_exception import ConfigurationException, ConfigurationError, ConfigurationEnum
-from app.core.exception.error_base import ErrorCode, ArgumentError
+from core.exception.configuration_exception import ConfigurationException, ConfigurationError, ConfigurationEnum
+from core.exception.error_base import ErrorCode, ArgumentError
 
 """
 Default app server configuration

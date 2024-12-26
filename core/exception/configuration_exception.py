@@ -1,9 +1,8 @@
-from abc import ABC
 from enum import Enum
 from http import HTTPStatus
 from typing import List
 
-from app.core.exception.error_base import ErrorCode, ArgumentError, CustomException
+from core.exception.error_base import ErrorCode, ArgumentError, CustomException
 
 
 class ConfigurationEnum(Enum):

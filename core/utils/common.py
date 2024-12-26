@@ -8,7 +8,7 @@ from sqlalchemy.sql import roles
 from sqlalchemy.sql._typing import _HasClauseElement
 from sqlalchemy import Select, and_, select, Result
 
-from app.core.db import Base
+from core.db import Base
 
 logger = logging.getLogger(__name__)
 

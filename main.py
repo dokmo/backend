@@ -3,7 +3,7 @@ import os
 import click
 import uvicorn
 
-from app.core.config.config import loader
+from core.config.config import loader
 
 """
 Reference FastAPI Boilerplate from https://github.com/teamhide/fastapi-boilerplate. 
