@@ -17,6 +17,13 @@ class LocalConfig(BaseSettings):
     APP_PORT: int = 8080
     DATABASE_URL = "sqlite+aiosqlite://"
 
+    KAKAO_CLIENT_ID = "your_kakao_client_id"
+    KAKAO_CLIENT_SECRET = "your_kakao_client_secret"
+    KAKAO_REDIRECT_URI = "your_kakao_redirect_uri"  # KAKAO_CLIENT_ID == AKAO_REDIRECT_URI
+    KAKAO_REST_API_KEY = "your_kakao_rest_api_key"
+    KAKAO_LOGOUT_REDIRECT_URI = "your_kakao_logout_redirect_uri"
+
+
 
 class DevConfig(LocalConfig):
     ENV: str = "dev"
