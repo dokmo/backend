@@ -32,6 +32,7 @@ class ResponseLogMiddleware:
                 if body := message.get("body"):
                     response_info.body += body.decode("utf8")
 
+
             await send(message)
 
         await self.app(scope, receive, _logging_send)
