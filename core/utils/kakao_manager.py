@@ -1,23 +1,16 @@
 import httpx
-from dotenv import load_dotenv
 from fastapi.templating import Jinja2Templates
-
 from core.config.config import loader
 
-"""
-manager가 할 일은 api여기에서 다루는게 아닌거같은데...
-"""
 
-# Jinja2 템플릿 설정 Jinja2 템플릿 엔진을 설정 (for test)
+# Jinja2 템플릿 설정
 templates = Jinja2Templates(directory="templates")
 
-# 환경 변수 로드
-load_dotenv()
 
 
 class KakaoAPI:
     def __init__(self):
-        # 카카오 API 관련 정보 로드
+        # 카카오 API 관련 정보를 환경 변수에서 로드
         self.client_id = loader.config.KAKAO_CLIENT_ID
         self.client_secret = loader.config.KAKAO_CLIENT_SECRET
         self.redirect_uri = loader.config.KAKAO_REDIRECT_URI
