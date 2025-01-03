@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from jose import jwt
 
+from core.config.config import loader
 
 class AbstractJWTEncoder(ABC):
     """
@@ -16,18 +17,18 @@ class AbstractJWTEncoder(ABC):
     """
 
     @abstractmethod
-    def encode(
-            self, data: dict, expires_delta: int, secret_key: str, algorithm: str
+    async def encode(
+            self, data: dict, expires_delta: int
     ) -> str:
         pass
 
 
 class JWTEncoder(AbstractJWTEncoder):
-    def encode(
-            self, data: dict, expires_delta: int, secret_key: str, algorithm: str
+    async def encode(
+            self, data: dict, expires_delta: int
     ) -> str:
         to_encode = data.copy()
         expire = datetime.now(ZoneInfo("Asia/Seoul")) + timedelta(minutes=expires_delta)
         to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, secret_key, algorithm=algorithm)
+        return jwt.encode(to_encode, key=loader.config.SECRET_KEY, algorithm=loader.config.ALGORITHM)
 

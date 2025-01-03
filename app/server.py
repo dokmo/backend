@@ -3,16 +3,14 @@ from typing import List
 from fastapi import FastAPI, Depends
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
 
 from api.root_router import root_router
 from core.exception.error_base import CustomException
 from core.exception.exception_handlers import custom_exception_handler
 from core.fastapi.logging import Logging
 from core.fastapi.middlewares import ResponseLogMiddleware
+from core.fastapi.middlewares.auth import VerifyTokenMiddleware
 from core.fastapi.middlewares.sqlalchemy import SQLAlchemyMiddleware
-
-from uuid import uuid4
 
 def init_routers(_app: FastAPI) -> None:
     _app.include_router(router=root_router)
@@ -33,12 +31,7 @@ def init_middleware() -> List[Middleware]:
         ),
         Middleware(SQLAlchemyMiddleware),
         Middleware(ResponseLogMiddleware),
-
-        Middleware(SessionMiddleware, secret_key=str(uuid4()))
-
-        # DELETEME
-        # 한번만 선언되고 키가 변경이 안될 것 같아. 더 찾아봐야함.
-
+        # Middleware(VerifyTokenMiddleware)
     ]
     return middlewares
 

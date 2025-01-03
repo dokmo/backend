@@ -1,18 +1,16 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from app.jwt.service.service import JWTService
-from app.jwt.schemas.decoder import JWTDecoder
-from app.jwt.schemas.encoder import JWTEncoder
 from core.utils.kakao_manager import KakaoAPI
 
 
 kakao_router = APIRouter()
 kakao_api = KakaoAPI()
-jwt_service = JWTService(JWTEncoder, JWTDecoder)
+jwt_service = JWTService()
 
 @kakao_router.get("/login")
-def get_kakao_code(request: Request):
-    scope = 'profile_nickname, profile_image'           # 요청할 권한 범위
+async def get_kakao_code(request: Request):
+    scope = 'profile_nickname, profile_image'           # 요청할 권한 범위 https://developers.kakao.com/console/app/1182284/product/login/scope
     kakao_auth_url = kakao_api.getcode_auth_url(scope)
     return RedirectResponse(kakao_auth_url)
 
@@ -22,15 +20,17 @@ def get_kakao_code(request: Request):
 @kakao_router.get("/callback")
 async def kakao_callback(request: Request, code: str):
     token_info = await kakao_api.get_token(code)
-
-    # FIXME("받은 정보로 해야할 일이 무엇이 있는지?")
-
-
     if "access_token" in token_info:
-        request.session['access_token'] = token_info['access_token']
+        user_info = kakao_api.get_user_info(token_info)
+
+        # 토큰 발급 FIXME("제대로 했는지 확인하여야함.")
+        token = await jwt_service.create_access_token()
+
+
         return RedirectResponse(url="/user_info", status_code=302)
     else:
         return RedirectResponse(url="/?error=Failed to authenticate", status_code=302)
+
 
 
 
@@ -39,7 +39,8 @@ async def logout(request: Request):
     client_id = kakao_api.client_id
     logout_redirect_uri = kakao_api.logout_redirect_uri
     await kakao_api.logout(client_id, logout_redirect_uri)
-    # FIXME("로그아웃때 jwt는 무엇을 해야하는지?.")
+    # FIXME("로그아웃때 jwt는 무엇을 해야하는지?")
+    # FIXME("same site option?? None이 아니라 다른걸로 바뀜.")
     return RedirectResponse(url="/")
 
 
