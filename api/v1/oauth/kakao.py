@@ -26,7 +26,6 @@ async def kakao_callback(request: Request, code: str):
         # 토큰 발급 FIXME("제대로 했는지 확인하여야함.")
         token = await jwt_service.create_access_token()
 
-
         return RedirectResponse(url="/user_info", status_code=302)
     else:
         return RedirectResponse(url="/?error=Failed to authenticate", status_code=302)

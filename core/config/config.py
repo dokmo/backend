@@ -17,13 +17,16 @@ class LocalConfig(BaseSettings):
     APP_PORT: int = 8080
     DATABASE_URL = "sqlite+aiosqlite://"
 
-    KAKAO_CLIENT_ID = "your_kakao_client_id"
-    KAKAO_CLIENT_SECRET = "your_kakao_client_secret"
-    KAKAO_REDIRECT_URI = "your_kakao_redirect_uri"  # KAKAO_CLIENT_ID == AKAO_REDIRECT_URI
-    KAKAO_REST_API_KEY = "your_kakao_rest_api_key"
-    KAKAO_LOGOUT_REDIRECT_URI = "your_kakao_logout_redirect_uri"
+    KAKAO_CLIENT_ID = os.environ.get("KAKAO_CLIENT_ID", "")                    # KAKAO_CLIENT_ID == KAKAO_REST_API_KEY
+    KAKAO_CLIENT_SECRET = os.environ.get("KAKAO_CLIENT_SECRET", "")                # https://developers.kakao.com/console/app/1182284/product/businessAuthentication/security
+    KAKAO_REDIRECT_URI = os.environ.get("KAKAO_REDIRECT_URI", "")       #
+    KAKAO_REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY", "")                  # https://developers.kakao.com/console/app/1182284/config/appKey
+    KAKAO_LOGOUT_REDIRECT_URI = os.environ.get("KAKAO_LOGOUT_REDIRECT_URI", "")  # https://developers.kakao.com/console/app/1182284/product/businessAuthentication/security
 
-
+    SECRET_KEY = os.environ.get("SECRET_KEY", "")
+    ALGORITHM = os.environ.get("ALGORITHM", "")
+    ACCESS_TOKEN_EXPIRE_MINUTES = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "")
+    REFRESH_TOKEN_EXPIRE_MINUTES = os.environ.get("REFRESH_TOKEN_EXPIRE_MINUTES", "")
 
 class DevConfig(LocalConfig):
     ENV: str = "dev"
@@ -46,6 +49,7 @@ class ProdConfig(LocalConfig):
     DATABASE_PORT = "YOUR_DATABASE_PORT"
     DATABASE_URL = f"mariadb+aiomysql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
     WORKERS = 1
+
 
 
 class ConfigLoader:
