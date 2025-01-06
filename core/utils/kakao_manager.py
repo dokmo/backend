@@ -11,17 +11,18 @@ templates = Jinja2Templates(directory="templates")
 class KakaoAPI:
     def __init__(self):
         # 카카오 API 관련 정보를 환경 변수에서 로드
-        self.client_id = loader.config.KAKAO_CLIENT_ID
-        self.client_secret = loader.config.KAKAO_CLIENT_SECRET
-        self.redirect_uri = loader.config.KAKAO_REDIRECT_URI
-        self.rest_api_key = loader.config.KAKAO_REST_API_KEY
-        self.logout_redirect_uri = loader.config.KAKAO_LOGOUT_REDIRECT_URI
+        self.client_id:str = loader.config.KAKAO_CLIENT_ID
+        self.client_secret:str = loader.config.KAKAO_CLIENT_SECRET
+        self.redirect_uri:str = loader.config.KAKAO_REDIRECT_URI
+        self.rest_api_key:str = loader.config.KAKAO_REST_API_KEY
+        self.logout_redirect_uri:str = loader.config.KAKAO_LOGOUT_REDIRECT_URI
 
     def getcode_auth_url(self, scope):
         # 카카오 로그인을 위한 인증 URL 생성
         return f'https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={self.rest_api_key}&redirect_uri={self.redirect_uri}&scope={scope}'
 
-    async def get_token(self, code):
+    async def get_token(self, code:str):
+        # 참고: https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-token-request-body
         # 카카오로부터 인증 코드를 사용해 액세스 토큰 요청
         token_request_url = 'https://kauth.kakao.com/oauth/token'
         token_request_payload = {
@@ -33,7 +34,7 @@ class KakaoAPI:
         }
 
         async with httpx.AsyncClient() as client:
-            response = await client.post(token_request_url, data=token_request_payload)
+            response = await client.post(url = token_request_url, data=token_request_payload)
         result = response.json()
         return result
 

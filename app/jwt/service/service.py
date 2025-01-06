@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-import bcrypt
 from jose import jwt
 from core.config.config import loader
 
@@ -24,13 +23,12 @@ class JWTService:
 
 
     async def create_access_token(self, data: dict) -> str:
-        return self._create_token(data, self.access_token_expire_time)
+        return await self._create_token(data, self.access_token_expire_time)
 
     async def create_refresh_token(self, data: dict) -> str:
-        return self._create_token(data, self.refresh_token_expire_time)
+        return await self._create_token(data, self.refresh_token_expire_time)
 
     async def _create_token(self, data: dict, expires_delta: int) -> str:
-
         to_encode = data.copy()
         expire = datetime.now(ZoneInfo("Asia/Seoul")) + timedelta(minutes=expires_delta)
         to_encode.update({"exp": expire})
@@ -38,11 +36,6 @@ class JWTService:
         return encoded_jwt
 
     async def check_token_expired(self, token: str) -> dict | None:
-        # FIXME("
-        #  token체크는 어디에서 할것인지?: 로그인을 제외한 미들웨어에.
-        #  어떤것을 체크해야하는지?: decode가 되었는지. 토큰 시간이 만료가 되었는지.
-        #  그 다음은...? 뭐가필요하지?
-        #  ")
         try:
             decoded_data = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             return decoded_data

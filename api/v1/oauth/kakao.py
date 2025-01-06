@@ -18,14 +18,19 @@ async def get_kakao_code(request: Request):
 # 카카오 로그인 후 카카오에서 리디렉션될 엔드포인트
 # 카카오에서 제공한 인증 코드를 사용하여 액세스 토큰을 요청
 @kakao_router.get("/callback")
-async def kakao_callback(request: Request, code: str):
+async def kakao_callback(request: Request):
+# async def kakao_callback(request: Request, code: str, error: str, error_description: str, state: str):
+    code = request.query_params.get("code")
     token_info = await kakao_api.get_token(code)
     if "access_token" in token_info:
-        user_info = kakao_api.get_user_info(token_info)
-
-        # 토큰 발급 FIXME("제대로 했는지 확인하여야함.")
-        token = await jwt_service.create_access_token()
-
+        user_info = await kakao_api.get_user_info(token_info.get("access_token"))
+        # 토큰 발급
+        users = {'userId':user_info.get('id')}
+        # token = await jwt_service.create_access_token(data = users)
+        # print(token)
+        # decoded_token = await jwt_service.check_token_expired(token)
+        # print(decoded_token)
+        # FIXME("에러 발생에 따른 방법은?")
         return RedirectResponse(url="/user_info", status_code=302)
     else:
         return RedirectResponse(url="/?error=Failed to authenticate", status_code=302)
