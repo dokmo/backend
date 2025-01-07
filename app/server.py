@@ -31,7 +31,6 @@ def init_middleware() -> List[Middleware]:
         ),
         Middleware(SQLAlchemyMiddleware),
         Middleware(ResponseLogMiddleware),
-        # Middleware(VerifyTokenMiddleware)
     ]
     return middlewares
 
@@ -48,6 +47,7 @@ def init_app() -> FastAPI:
     )
     init_routers(_app=_app)
     init_exception_handlers(_app=_app)
+    _app.add_middleware(VerifyTokenMiddleware)
     return _app
 
 app = init_app()

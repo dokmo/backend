@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from jose import jwt
+from jose import jwt, ExpiredSignatureError
 from core.config.config import loader
 
 
@@ -35,12 +35,13 @@ class JWTService:
         encoded_jwt = jwt.encode(to_encode, key = self.secret_key, algorithm = self.algorithm) # 암호화 및 토큰 생성
         return encoded_jwt
 
+    # middlewares의 auth가 역할을 대신함.
     async def check_token_expired(self, token: str) -> dict | None:
         try:
             decoded_data = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             return decoded_data
         except Exception as e:
-            print("Token verification failed:", e) # FIXME("decode실패시 처리해야할 것은?")
+            print("Token verification failed:", e)
             return None
 
 

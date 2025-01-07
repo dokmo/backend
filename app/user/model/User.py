@@ -7,5 +7,5 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'USER'
     idx = Column(Integer, primary_key=True, autoincrement=True)
-    id = Column(String(30), primary_key=True, default=str(uuid4()))
+    user_id = Column(String(36), primary_key=True, default=str(uuid4()))
     name = Column(String(30))

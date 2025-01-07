@@ -15,7 +15,6 @@ def create_access_token(data: dict):
     :return: Encoded JWT token as a string.
     """
     to_encode = data.copy()
-
     expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -37,10 +36,11 @@ def decode_access_token(token: str):
 
 # Example usage
 # Step 1: Create random salt
-bytes_password = b'dokmo!!!!'
-bytes_hashed_password = bcrypt.hashpw(bytes_password, bcrypt.gensalt())
+user_info = {'user_id': 9318597893}
+token = create_access_token(data = user_info)
+bytes_hashed_password = bcrypt.hashpw(user_info, bcrypt.gensalt())
 
-print("Generated Salt:", bytes_password)
+print("bytes_hashed_password:", bytes_hashed_password)
 
 # Step 2: Create a token with payload and bytes_password
 payload = {"sub": "user@example.com"}
