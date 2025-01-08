@@ -29,7 +29,7 @@ async def kakao_callback(request: Request):
         # kakao 고유 유저 id 획득
         user_info = await kakao_api.get_user_info(token_info.get("access_token"))
         kakao_user_id = user_info.get('id')
-        kakao_user_id = uuid.UUID()
+        kakao_user_id = str(uuid.uuid4())
         kakao_user_nickname = user_info.get('properties').get('nickname')
 
 
