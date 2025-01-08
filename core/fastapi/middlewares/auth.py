@@ -15,7 +15,7 @@ SKIP_URLS = ["/public",
              "/swagger.ui",
              "/api/example/",
              "/api/kakao/login",
-             "/api/kakao/callback",]
+             "/api/kakao/callback"]
 
 class VerifyTokenMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp) -> None:

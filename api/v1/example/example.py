@@ -1,3 +1,5 @@
+from wsgiref import headers
+
 from fastapi import APIRouter, Request
 
 
@@ -8,6 +10,6 @@ async def hello_world():
     return "hello_world!"
 
 
-@example_router.get(path="/protected")
+@example_router.get(path="/protected") #FIXME(jwt 미들웨어 테스트용 url입니다.)
 async def hello_world():
     return {"message":"protected hello_world!"}

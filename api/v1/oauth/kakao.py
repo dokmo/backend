@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from app.jwt.service.service import JWTService
@@ -18,26 +20,49 @@ async def get_kakao_code(request: Request):
 
 # 카카오 로그인 후 카카오에서 리디렉션될 엔드포인트
 # 카카오에서 제공한 인증 코드를 사용하여 액세스 토큰을 요청
-#FIXME(미들웨어의 토큰 검사에서 제외되어야해.)
 @kakao_router.get("/callback")
 async def kakao_callback(request: Request):
 # async def kakao_callback(request: Request, code: str, error: str, error_description: str, state: str):
     code = request.query_params.get("code")
     token_info = await kakao_api.get_token(code)
     if "access_token" in token_info:
+        # kakao 고유 유저 id 획득
         user_info = await kakao_api.get_user_info(token_info.get("access_token"))
-        users = {'userId':user_info.get('id')}
-        # FIXME(userId가 존재할 경우 신규, 아닐경우 db에서 가져와야함.)
-        # FIXME(userId가 db와 연결하여 데이터를 가져와야함. 그리고 토큰에 집어넣을거야. 우선 users를 일단 사용하자. 나중에 db에서 가져오는걸로 하고.)
+        kakao_user_id = user_info.get('id')
+        kakao_user_id = uuid.UUID()
+        kakao_user_nickname = user_info.get('properties').get('nickname')
+
+
+        # # FIXME(userId가 존재할 경우 신규, 아닐경우 db에서 가져와야함.)
+        # # db로 부터 유저 확인. kakaoid가 없으면 해당 유저를 추가시키고, 있으면 해당 user_id를 가져옴.
+        # user = await user_service.(kakao_user_id=kakao_user_id)
+        # if not user:
+        #     #유저 추가
+        # user_id = user.user_id
+        # users = {'user_id':user_id}
+
+
+        users = {'kakao_user_id':kakao_user_id} #FIXME(uuid구현 전까지 일단 kakao_user_id 사용.)
+
         access_token = await jwt_service.create_access_token(data = users)
         refresh_token = await jwt_service.create_refresh_token(data = users)
 
-        response = JSONResponse({"access_token": access_token})
-        response.headers["Authorization"] = f"Bearer {access_token}"
+
+        # 응답에 토큰과 사용자 ID 설정 FIXME(임시 테스트용 코드. userId를 kakao id 가 아닌 userid(UUID)로 바꾸어야함.)
+        response_data = {
+            'message': 'Success',
+            'data': {
+                'access_token': access_token,
+                'user_nickname': kakao_user_nickname
+            }
+        }
+
+        response = JSONResponse(content=response_data, status_code=200)
+        # response.headers["Authorization"] = f"Bearer {access_token}"
         response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True)
 
-        # response = RedirectResponse(url="/", status_code=302)
-        # FIXME(미들웨어에서 이 토큰을 사용할텐데 이 다음 과정을 어떻게 해야하지?)
+
+        # response = RedirectResponse(url="/api/kakao/user_info", status_code=302)
         return response
     else:
         return RedirectResponse(url="/?error=Failed to authenticate", status_code=302)
@@ -50,14 +75,19 @@ async def logout(request: Request):
     await kakao_api.logout(client_id, logout_redirect_uri)
     # FIXME("로그아웃때 jwt는 무엇을 해야하는지?")
     # FIXME("same site option?? None이 아니라 다른걸로 바뀜.")
-    return RedirectResponse(url="/")
+    return RedirectResponse(url="/api/example")
 
 
 
 #FIXME(TEST)
+# 사용자 정보 엔드포인트
 @kakao_router.get("/user_info")
 async def get_user_info(request: Request):
-    user_id = request.session.get("userId")
-    return {user_id}
+    kakao_userId = request.session.get("kakao_user_id")
+    if not kakao_userId:
+        return JSONResponse(content={"error": "User not authenticated"}, status_code=401)
+
+    # 응답에 사용자 ID 반환
+    return {"kakao_userId": kakao_userId}
 
 
