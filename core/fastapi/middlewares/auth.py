@@ -1,9 +1,21 @@
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-from starlette.datastructures import Headers
-from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.types import ASGIApp
 from jose import jwt, JWTError
 from core.config.config import loader
+
+
+
+# 스킵할 URL 목록
+SKIP_URLS = ["/public",
+             "/health",
+             "/docs",
+             "/redoc",
+             "/swagger.ui",
+             "/api/example/",
+             "/api/kakao/login",
+             "/api/kakao/callback",]
 
 class VerifyTokenMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp) -> None:
@@ -11,7 +23,7 @@ class VerifyTokenMiddleware(BaseHTTPMiddleware):
         self.secret_key = loader.config.SECRET_KEY
         self.algorithm = loader.config.ALGORITHM
 
-    def extract_token(self, headers: Headers) -> str:
+    def extract_token(self, headers) -> str:
         auth_header = headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
             raise JWTError("Authorization header missing or invalid")
@@ -20,35 +32,21 @@ class VerifyTokenMiddleware(BaseHTTPMiddleware):
     def verify_token(self, token: str) -> dict:
         return jwt.decode(token, self.secret_key, algorithms=[self.algorithm], options={"verify_exp": True})
 
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http":
-            await self.app(scope, receive, send)
-            return
+    async def dispatch(self, request: Request, call_next):
+        # 현재 요청 URL 경로 가져오기
+        path = request.scope.get("path")
+        if path in SKIP_URLS:  # URL이 스킵 목록에 있으면 인증 건너뜀
+            return await call_next(request)
 
-        # 요청된 엔드포인트 확인
-        route = scope.get("endpoint")  #FIXME("현재 요청의 엔드포인트 함수?")
-        if route and getattr(route, "_skip_jwt_verification", False):  # 데코레이터 확인??
-            await self.app(scope, receive, send)
-            return
-
-        headers = Headers(scope=scope)
+        headers = request.headers
         try:
             token = self.extract_token(headers)
             payload = self.verify_token(token)
-            scope["user"] = payload.get("sub")  # 사용자 정보를 scope에 저장
+            # JWT 페이로드에서 사용자 정보를 scope에 추가
+            request.scope["user"] = payload.get("sub")
         except JWTError:
-            response = JSONResponse({"detail": "Invalid or expired token"}, status_code=401)
-            await response(scope, receive, send)
-            return
+            return JSONResponse({"detail": "Invalid or expired token"}, status_code=401)
         except Exception as e:
-            response = JSONResponse({"detail": str(e)}, status_code=500)
-            await response(scope, receive, send)
-            return
+            return JSONResponse({"detail": str(e)}, status_code=500)
 
-        await self.app(scope, receive, send)
-
-def skip_jwt_verification(func=None, *, condition=True):
-    def decorator(func):
-        func._skip_jwt_verification = condition
-        return func
-    return decorator if func is None else decorator(func)
+        return await call_next(request)
