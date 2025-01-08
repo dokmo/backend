@@ -8,14 +8,17 @@ from core.config.config import loader
 
 
 # 스킵할 URL 목록
-SKIP_URLS = ["/public",
-             "/health",
-             "/docs",
-             "/redoc",
-             "/swagger.ui",
-             "/api/example/",
-             "/api/kakao/login",
-             "/api/kakao/callback"]
+SKIP_URLS = [
+    "/",
+    "/public",
+    "/health",
+    "/docs",
+    "/redoc",
+    "/swagger.ui",
+    "/api/example/",
+    "/api/kakao/login",
+    "/api/kakao/callback"
+]
 
 class VerifyTokenMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp) -> None:
@@ -43,7 +46,7 @@ class VerifyTokenMiddleware(BaseHTTPMiddleware):
             token = self.extract_token(headers)
             payload = self.verify_token(token)
             # JWT 페이로드에서 사용자 정보를 scope에 추가
-            request.scope["user"] = payload.get("sub")
+            request.scope["user_id"] = payload.get("sub")
         except JWTError:
             return JSONResponse({"detail": "Invalid or expired token"}, status_code=401)
         except Exception as e:
