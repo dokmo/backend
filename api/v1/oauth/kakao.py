@@ -13,7 +13,14 @@ jwt_service = JWTService()
 #FIXME(미들웨어의 토큰 검사에서 제외되어야해.)
 @kakao_router.get("/login")
 async def get_kakao_code(request: Request):
-    scope = 'profile_nickname, profile_image'           # 요청할 권한 범위 https://developers.kakao.com/console/app/1182284/product/login/scope
+    scope = 'profile_nickname, profile_image'
+    host = request.client.host
+
+    if host == '127.0.0.1':
+        kakao_api.set_redirect_uri(kakao_api.local_redirect_uri)
+    else:
+        kakao_api.set_redirect_uri(kakao_api.prod_redirect_uri)
+
     kakao_auth_url = kakao_api.getcode_auth_url(scope)
     return RedirectResponse(kakao_auth_url)
 

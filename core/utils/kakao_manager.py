@@ -13,12 +13,16 @@ class KakaoAPI:
         # 카카오 API 관련 정보를 환경 변수에서 로드
         self.client_id:str = loader.config.KAKAO_CLIENT_ID
         self.client_secret:str = loader.config.KAKAO_CLIENT_SECRET
-        self.redirect_uri:str = loader.config.KAKAO_REDIRECT_URI
+        self.redirect_uri:str = ""
+        self.local_redirect_uri:str = loader.config.KAKAO_LOCAL_REDIRECT_URI
+        self.prod_redirect_uri:str = loader.config.KAKAO_PROD_REDIRECT_URI
         self.rest_api_key:str = loader.config.KAKAO_REST_API_KEY
         self.logout_redirect_uri:str = loader.config.KAKAO_LOGOUT_REDIRECT_URI
 
+    def set_redirect_uri(self, redirect_uri):
+        self.redirect_uri = redirect_uri
+
     def getcode_auth_url(self, scope):
-        # 카카오 로그인을 위한 인증 URL 생성
         return f'https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={self.rest_api_key}&redirect_uri={self.redirect_uri}&scope={scope}'
 
     async def get_token(self, code:str):
