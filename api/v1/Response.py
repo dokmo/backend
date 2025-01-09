@@ -11,7 +11,7 @@ class DefaultResponse(BaseModel, Generic[T]):
     data: T
 
     @staticmethod
-    async def create_response(data: T, message: str = "OK") -> "DefaultResponse[T]":
+    def create_response(data: T, message: str = "OK") -> "DefaultResponse[T]":
         """
         응답 데이터를 DefaultResponse 형태로 변환하는 Static 메서드
         :param data: 응답 데이터

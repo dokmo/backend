@@ -15,8 +15,3 @@ class MeetService(metaclass=Singleton):
     async def get_meets(self, pagination: Params = None) -> Page[Meet]:
         meets: List[Meet] = await self.__repository.get_meets()
         return await paginate(meets, pagination)
-
-
-
-
-meet_service = MeetService()
