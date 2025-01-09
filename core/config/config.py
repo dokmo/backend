@@ -19,7 +19,7 @@ class LocalConfig(BaseSettings):
     KAKAO_CLIENT_ID = os.environ.get("KAKAO_CLIENT_ID", "")                    # KAKAO_CLIENT_ID == KAKAO_REST_API_KEY
     KAKAO_CLIENT_SECRET = os.environ.get("KAKAO_CLIENT_SECRET", "")                # https://developers.kakao.com/console/app/1182284/product/businessAuthentication/security
     KAKAO_LOCAL_REDIRECT_URI = os.environ.get("KAKAO_LOCAL_REDIRECT_URI", "")
-    KAKAO__PROD_REDIRECT_URI = os.environ.get("KAKAO_PROD_REDIRECT_URI", "")
+    KAKAO_PROD_REDIRECT_URI = os.environ.get("KAKAO_PROD_REDIRECT_URI", "")
     KAKAO_REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY", "")                  # https://developers.kakao.com/console/app/1182284/config/appKey
     KAKAO_LOGOUT_REDIRECT_URI = os.environ.get("KAKAO_LOGOUT_REDIRECT_URI", "")  # https://developers.kakao.com/console/app/1182284/product/businessAuthentication/security
 
