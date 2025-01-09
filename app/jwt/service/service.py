@@ -13,8 +13,8 @@ class JWTService:
             self,
             algorithm: str = loader.config.ALGORITHM,
             secret_key: str = loader.config.SECRET_KEY,
-            access_token_expire_time: int = loader.config.ACCESS_TOKEN_EXPIRE_MINUTES,
-            refresh_token_expire_time: int = loader.config.REFRESH_TOKEN_EXPIRE_MINUTES,
+            access_token_expire_time: int = int(loader.config.ACCESS_TOKEN_EXPIRE_MINUTES),
+            refresh_token_expire_time: int = int(loader.config.REFRESH_TOKEN_EXPIRE_MINUTES),
     ):
         self.algorithm = algorithm
         self.secret_key = secret_key
