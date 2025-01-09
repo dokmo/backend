@@ -55,12 +55,12 @@ async def kakao_callback(request: Request):
             }
         }
         # response = RedirectResponse(url="/", status_code=200)
-        headers: dict = { "Location" : "/login/success"}
+        headers: dict = { "Location" : "http://localhost:3000/login/success"} # FIXME - properties
         response = JSONResponse(content=response_data, status_code=302, headers=headers)
         response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True)
         return response
     else:
-        return RedirectResponse(url="/login/failed", status_code=302)
+        return RedirectResponse(url="http://localhost:3000/login/failed", status_code=302)
 
 
 @kakao_router.get("/logout")
