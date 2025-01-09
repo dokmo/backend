@@ -19,8 +19,11 @@ class KakaoAPI:
         self.rest_api_key:str = loader.config.KAKAO_REST_API_KEY
         self.logout_redirect_uri:str = loader.config.KAKAO_LOGOUT_REDIRECT_URI
 
-    def set_redirect_uri(self, redirect_uri):
-        self.redirect_uri = redirect_uri
+    def set_prod_redirect_uri(self):
+        self.redirect_uri = self.prod_redirect_uri
+
+    def set_local_redirect_uri(self):
+        self.redirect_uri = self.local_redirect_uri
 
     def getcode_auth_url(self, scope):
         return f'https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={self.rest_api_key}&redirect_uri={self.redirect_uri}&scope={scope}'

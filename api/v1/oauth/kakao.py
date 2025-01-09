@@ -17,9 +17,9 @@ async def get_kakao_code(request: Request):
     host = request.client.host
 
     if host == '127.0.0.1':
-        kakao_api.set_redirect_uri(kakao_api.local_redirect_uri)
+        kakao_api.set_local_redirect_uri()
     else:
-        kakao_api.set_redirect_uri(kakao_api.prod_redirect_uri)
+        kakao_api.set_prod_redirect_uri()
 
     kakao_auth_url = kakao_api.getcode_auth_url(scope)
     return RedirectResponse(kakao_auth_url)
