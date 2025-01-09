@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import FastAPI, Depends
+from fastapi_pagination import add_pagination
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
@@ -48,6 +49,8 @@ def init_app() -> FastAPI:
     )
     init_routers(_app=_app)
     init_exception_handlers(_app=_app)
+    #pagination lib
+    add_pagination(_app)
     return _app
 
 app = init_app()
