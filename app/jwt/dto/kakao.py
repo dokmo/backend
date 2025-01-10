@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from pydantic import BaseModel, ValidationError
+from typing import Optional
 
 
 @dataclass
