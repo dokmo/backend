@@ -17,7 +17,14 @@ async def kakao_callback(request: Request):
     response_data: TokenResponseData = TokenResponseData(
         access_token=user_info.access_token, user_name=user_info.user_name
     )
-    response_body: DefaultResponse[TokenResponseData] = DefaultResponse.create_response(data=response_data, message="Login success")
+    response_body = {
+        "message" : "Login success",
+        "data": {
+            "access_token": user_info.access_token,
+            "user_name": user_info.user_name
+        }
+    }
+    # response_body: DefaultResponse[TokenResponseData] = DefaultResponse.create_response(data=response_data, message="Login success")
     response = JSONResponse(content=response_body, status_code=200)
     response.set_cookie(key="refresh_token", value=user_info.refresh_token, httponly=True, secure=True)
     return response
