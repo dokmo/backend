@@ -25,7 +25,6 @@ class MeetModel(Base, TimeStamp):
     creator_name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
 
-
     @classmethod
     def from_domain(cls, *, meet: Meet):
         return cls(
