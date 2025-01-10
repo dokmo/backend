@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from pydantic import BaseModel
+# from pydantic import BaseModel
 
 @dataclass
-class TokenResponseData(BaseModel):
+class TokenResponseData:
     access_token: str
     user_name: str
