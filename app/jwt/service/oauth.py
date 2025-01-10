@@ -54,7 +54,7 @@ class KakaoAuthService(metaclass=Singleton):
         #TODO User database update
         return UserLoginInfo(access_token=jwt_access_token,
                              refresh_token=jwt_refresh_token,
-                             user_id=user_info.id, user_name=user_info.nickname)
+                             user_id=user_info.id, user_name=user_info.properties.nickname)
 
     async def __get_access_token(self, code:str, host: str) -> Optional[KakaoAccessTokenResponse]:
         token_request_url = 'https://kauth.kakao.com/oauth/token'
