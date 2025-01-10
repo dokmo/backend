@@ -8,26 +8,23 @@ class KakaoUserData(BaseModel):
     id: int
     nickname: str
 
-@dataclass
 class KakaoAccessTokenResponse(BaseModel):
     token_type: str
     access_token: str
-    id_token: str
+    id_token: Optional[str] = None
     expires_in: int
     refresh_token: str
     refresh_token_expires_in: int
-    scope: str
+    scope: Optional[str] = None
 
-@dataclass
 class KakaoProperties(BaseModel):
-    nickname: str
-    profile_image: str
-    thumbnail_image: str
+    nickname: Optional[str] = None
+    profile_image: Optional[str] = None
+    thumbnail_image: Optional[str] = None
 
-@dataclass
 class KakaoUserResponse(BaseModel):
     id: int
-    properties: KakaoProperties
+    properties: Optional[KakaoProperties] = None
 
 
 def mapping_access_token(response_json: dict) -> KakaoAccessTokenResponse:
