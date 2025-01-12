@@ -1,28 +1,41 @@
 import uuid
 from typing import List
 
+from app.meet.application.dto.meet_request import MeetJoinRequest, MeetCreateRequest
 from app.meet.domain.meet import Meet
 from app.meet.infrastructure.repository import MeetRepository
+from app.user.infrastructure.repository.user_repository import UserRepository
 from core.utils import Singleton
 
 class MeetService(metaclass=Singleton):
     def __init__(self):
-        self.__repository = MeetRepository()
+        self.__meet_repository = MeetRepository()
+        self.__user_repository = UserRepository()
 
     async def get_meets(self) -> List[Meet]:
-        meets: List[Meet] = await self.__repository.get_meets()
+        meets: List[Meet] = await self.__meet_repository.get_meets()
         return meets
 
     async def get_my_meets(self, user_id: uuid.UUID) -> List[Meet]:
-        meets: List[Meet] = await self.__repository.get_user_meets(user_id=user_id)
+        meets: List[Meet] = await self.__meet_repository.get_my_meets(user_id=user_id)
         return meets
 
-    async def get_meet_detail(self, meet_id) -> Meet:
-        meet: Meet = await self.__repository.get_meet_detail(meet_id=meet_id)
+    async def get_meet_detail(self, meet_id: uuid.UUID) -> Meet:
+        meet: Meet = await self.__meet_repository.get_meet_detail(meet_id=meet_id)
         return meet
 
-    async def get_my_meet_detail(self, meet_id, user_id):
-        meet: Meet = await self.__repository.get_my_meet_detail(meet_id=meet_id, user_id=user_id)
-        pass
+    async def get_my_meet_detail(self, meet_id, user_id) -> Meet:
+        meet: Meet = await self.__meet_repository.get_my_meet_detail(meet_id=meet_id, user_id=user_id)
+        return meet
+
+    async def create_meet(self, request: MeetCreateRequest, creator_id:uuid.UUID):
+        await self.__meet_repository.create_meet(request=request, create_id=creator_id)
+
+    async def join_meet(self, request: MeetJoinRequest):
+        await self.__meet_repository.join_meet(request=request)
+
+    async def approve_or_decline_join(self, request: MeetJoinRequest):
+        await self.__meet_repository.approve_or_decline_join(request=request)
+
 
 

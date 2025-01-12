@@ -2,10 +2,12 @@ from typing import List
 
 from sqlalchemy.orm import Mapped
 from sqlalchemy.testing.schema import mapped_column
-from sqlalchemy.types import String, UUID
+from sqlalchemy.types import String
+from uuid import UUID
 
 from app.meet.domain.meet import Meet
 from core.db import Base, TimeStamp
+
 
 class Participants(Base, TimeStamp):
     __tablename__ = "meet_user_bindings"
@@ -13,6 +15,7 @@ class Participants(Base, TimeStamp):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     meet_id: Mapped[int] = mapped_column(nullable=False)
     user_id: Mapped[int] = mapped_column(nullable=False)
+    approval: Mapped[str] = mapped_column(String, nullable=False)
 
 
 class MeetModel(Base, TimeStamp):
@@ -35,11 +38,11 @@ class MeetModel(Base, TimeStamp):
             description = meet.description
         )
 
-    def to_domain(self, participants: List[Participants] = None) -> Meet:
+    def to_domain(self, creator_id:UUID, participants: List[Participants] = None) -> Meet:
         return Meet(
             meet_id=self.meet_id,
             meet_name=self.meet_name,
-            creator_id=self.creator_id,
+            creator_id=creator_id,
             creator_name=self.creator_name,
             description=self.description,
             participants=[
