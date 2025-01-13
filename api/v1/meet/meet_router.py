@@ -29,7 +29,7 @@ async def get_meets(pagination: Params = Depends()) -> DefaultResponse[Page[Meet
     return response
 
 
-@meet_router.get(path="/my_meets")
+@meet_router.get(path="/my_meets") #FIXME(check url)
 async def get_my_meets(
         pagination: Params = Depends(),
 ) -> DefaultResponse[Page[MeetResponseData]]:
@@ -50,7 +50,7 @@ async def get_meet_detail(
     return response
 
 
-@meet_router.get(path="/my_detail")
+@meet_router.get(path="/my_detail") #FIXME(check url)
 async def get_my_meet_detail(
         meet_id:uuid.UUID
 ) -> DefaultResponse[MeetResponseData]:
