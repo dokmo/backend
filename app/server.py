@@ -1,11 +1,14 @@
+from contextlib import asynccontextmanager
 from typing import List
 
 from fastapi import FastAPI, Depends
 from fastapi_pagination import add_pagination
+from sqlalchemy.ext.asyncio import AsyncEngine
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
 from api.root_router import root_router
+from core.db.session import engines, EngineType, Base
 from core.exception.error_base import CustomException
 from core.exception.exception_handlers import custom_exception_handler
 from core.fastapi.logging import Logging
@@ -43,12 +46,26 @@ def init_app() -> FastAPI:
         docs_url="/swagger_ui",
         redoc_url="/redoc",
         dependencies=[Depends(Logging)],
-        middleware=init_middleware()
+        middleware=init_middleware(),
+        lifespan=lifespan
     )
     init_routers(_app=_app)
     init_exception_handlers(_app=_app)
     #pagination lib
     add_pagination(_app)
     return _app
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await initialize_database_tables()
+    yield
+
+
+async def initialize_database_tables():
+    engine: AsyncEngine = engines[EngineType.WRITER]
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+
+
 
 app = init_app()
