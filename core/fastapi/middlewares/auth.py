@@ -5,21 +5,6 @@ from starlette.types import ASGIApp
 from jose import jwt, JWTError
 from core.config.config import loader
 
-
-
-# 스킵할 URL 목록
-SKIP_URLS = [
-    "/",
-    "/public",
-    "/health",
-    "/docs",
-    "/redoc",
-    "/swagger.ui",
-    "/api/example/",
-    "/api/kakao/login",
-    "/api/kakao/callback"
-]
-
 class VerifyTokenMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp) -> None:
         super().__init__(app)
@@ -36,17 +21,11 @@ class VerifyTokenMiddleware(BaseHTTPMiddleware):
         return jwt.decode(token, self.secret_key, algorithms=[self.algorithm], options={"verify_exp": True})
 
     async def dispatch(self, request: Request, call_next):
-        # 현재 요청 URL 경로 가져오기
-        path = request.scope.get("path")
-        if path in SKIP_URLS:  # URL이 스킵 목록에 있으면 인증 건너뜀
-            return await call_next(request)
-
         headers = request.headers
         try:
             token = self.extract_token(headers)
             payload = self.verify_token(token)
-            # JWT 페이로드에서 사용자 정보를 scope에 추가
-            request.scope["user_id"] = payload.get("sub")
+            request.scope["user_id"] = payload.get("user_id", None)
         except JWTError:
             return JSONResponse({"detail": "Invalid or expired token"}, status_code=401)
         except Exception as e:

@@ -10,7 +10,6 @@ from core.exception.error_base import CustomException
 from core.exception.exception_handlers import custom_exception_handler
 from core.fastapi.logging import Logging
 from core.fastapi.middlewares import ResponseLogMiddleware
-from core.fastapi.middlewares.auth import VerifyTokenMiddleware
 from core.fastapi.middlewares.sqlalchemy import SQLAlchemyMiddleware
 
 def init_routers(_app: FastAPI) -> None:
@@ -31,8 +30,7 @@ def init_middleware() -> List[Middleware]:
             allow_headers=["*"],
         ),
         Middleware(SQLAlchemyMiddleware),
-        Middleware(ResponseLogMiddleware),
-        # Middleware(VerifyTokenMiddleware)
+        Middleware(ResponseLogMiddleware)
     ]
     return middlewares
 
