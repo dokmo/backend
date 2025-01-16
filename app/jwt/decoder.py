@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from jose import jwt, JWTError
 
+from core.config.config import loader
+
+
 class AbstractJWTDecoder(ABC):
     """
     JWT 디코더 추상클래스
@@ -12,13 +15,18 @@ class AbstractJWTDecoder(ABC):
     """
 
     @abstractmethod
-    async def decode(self, token: str, secret_key: str, algorithm: str) -> dict | None:
+    def decode(self, token: str) -> dict | None:
         pass
 
 
 class JWTDecoder(AbstractJWTDecoder):
-    async def decode(self, token: str, secret_key: str, algorithm: str) -> dict | None:
+
+    def __init__(self):
+        self.__secret_key = loader.config.SECRET_KEY
+        self.__algorithm = loader.config.ALGORITHM
+
+    def decode(self, token: str) -> dict | None:
         try:
-            return jwt.decode(token, secret_key, algorithms=[algorithm])
+            return jwt.decode(token, self.__secret_key, algorithms=[self.__algorithm], options={"verify_exp": True})
         except JWTError:
             return None

@@ -1,15 +1,14 @@
-from wsgiref import headers
+from fastapi import APIRouter, Request, Depends
 
-from fastapi import APIRouter, Request
-
+from core.fastapi.jwt_verifier import require_authorization, try_validate_token
 
 example_router = APIRouter()
 
 @example_router.get(path="")
-async def hello_world():
+async def hello_world(user_id: str = Depends(try_validate_token)):
     return "hello_world!"
 
 
-@example_router.get(path="/protected") #FIXME(jwt 미들웨어 테스트용 url입니다.)
-async def hello_world():
+@example_router.get(path="/protected")
+async def hello_world(request: Request):
     return {"message":"protected hello_world!"}
