@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import HTTPException
 from jose import JWTError
 from starlette.requests import Request
@@ -54,7 +56,7 @@ async def require_authorization(request: Request):
     token = auth_header[len("Bearer "):]
     try:
         payload = decoder.decode(token=token)
-        return payload.get("user_id", None)
+        return uuid.UUID(payload.get("user_id", None))
     except JWTError as e:
         raise HTTPException(status_code=401, detail=f"Invalid or expired token: {str(e)}")
 
@@ -83,6 +85,6 @@ async def try_validate_token (request: Request):
     token = auth_header[len("Bearer "):]
     try:
         payload = decoder.decode(token=token)
-        return payload.get("user_id", None)
+        return uuid.UUID(payload.get("user_id"))
     except JWTError as e:
         return None

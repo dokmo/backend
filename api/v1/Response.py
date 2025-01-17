@@ -1,12 +1,10 @@
 from dataclasses import dataclass
 from typing import TypeVar, Generic
 
-from pydantic import BaseModel
-
 T = TypeVar("T")
 
 @dataclass
-class DefaultResponse(BaseModel, Generic[T]):
+class DefaultResponse(Generic[T]):
     message: str
     data: T
 

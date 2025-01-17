@@ -10,7 +10,6 @@ from core.utils import Singleton
 class MeetService(metaclass=Singleton):
     def __init__(self):
         self.__meet_repository = MeetRepository()
-        self.__user_repository = UserRepository()
 
     async def get_meets(self) -> List[Meet]:
         meets: List[Meet] = await self.__meet_repository.get_meets()
