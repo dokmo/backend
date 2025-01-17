@@ -15,7 +15,7 @@ class LocalConfig(BaseSettings):
     DEBUG: bool = True
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 80
-    DATABASE_URL = "sqlite+aiosqlite://"
+    DATABASE_URL = "sqlite+aiosqlite:///./test.db"
     KAKAO_CLIENT_ID = os.environ.get("KAKAO_CLIENT_ID", "")                    # KAKAO_CLIENT_ID == KAKAO_REST_API_KEY
     KAKAO_CLIENT_SECRET = os.environ.get("KAKAO_CLIENT_SECRET", "")                # https://developers.kakao.com/console/app/1182284/product/businessAuthentication/security
     KAKAO_LOCAL_REDIRECT_URI = os.environ.get("KAKAO_LOCAL_REDIRECT_URI", "")
