@@ -1,6 +1,7 @@
 import uuid
 from typing import List
 
+from fastapi_pagination import Params
 from sqlalchemy import select
 
 from app.meet.application.dto.meet_request import MeetJoinRequest, MeetCreateRequest, Operations
@@ -9,29 +10,38 @@ from app.meet.domain.meet import Meet
 from app.meet.infrastructure.model.meet import MeetModel, Participants
 from core.db.session import session_factory
 from core.utils import Singleton
+from fastapi_pagination import paginate
 
 class MeetRepository(metaclass=Singleton):
 
-    async def get_meets(self) -> List[Meet]:
+    async def get_meets(self, pagination: Params):
+
+        page = pagination.page
+        size = pagination.size
+        skip = (page - 1) * size
+
         query = (
             select(MeetModel, UserModel)
             .join(UserModel, UserModel.id == MeetModel.creator_id)
             .order_by(MeetModel.created_at.desc())
+            .offset(skip)
+            .limit(size)
         )
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
-        meets_and_users = result.all()
 
-        meets: List[Meet] = []
-        if len(meets_and_users) != 0:
-            for meet_model, user in meets_and_users:
-                meet = meet_model.to_domain(creator_id = user.user_id)
-                meets.append(meet)
+        meets_and_users = result.scalars().all()
 
-        return meets
+        # meets: List[Meet] = []
+        # if len(meets_and_users) != 0:
+        #     for meet_model, user in meets_and_users:
+        #         meet = meet_model.to_domain(creator_id = user.user_id)
+        #         meets.append(meet)
+        data = paginate(meets_and_users, pagination)
+        return data
 
-    async def get_my_meets(self, user_id:uuid.UUID) -> List[Meet]:
+    async def get_my_meets(self, pagination, user_id:uuid.UUID) -> List[Meet]:
         query = (
             select(MeetModel, UserModel, Participants)
             .join(Participants, MeetModel.id == Participants.meet_id)
@@ -89,15 +99,20 @@ class MeetRepository(metaclass=Singleton):
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
+            user = result.scalars().one()
 
-        user = result.scalars().one()
+        if user is None:
+            raise Exception("User not found")
+
+
         meet_model = MeetModel(
-            meet_id=request.meet_id,
+            meet_id=uuid.uuid4(),
             meet_name=request.meet_name,
             creator_id=user.id,
-            creator_name=request.creator_name,
+            creator_name=user.nickname,
             description=request.description
         )
+
         async with session_factory() as write_session:
             write_session.add(meet_model)
             await write_session.commit()
