@@ -23,15 +23,14 @@ async def get_meets(user_id: uuid.UUID = Depends(try_validate_token), pagination
     else:
         meets: List[Meet] = await meet_service.get_my_meets(user_id=user_id)
 
+    meets_response_data: List[MeetResponseData] = []
     if len(meets) != 0:
         meets_response_data: List[MeetResponseData] = [domain_to_response(meet) for meet in meets]
-        response: DefaultResponse[Page[MeetResponseData]] = DefaultResponse.create_response(data= await paginate(meets_response_data, pagination))
-    else:
-        data = await paginate([], pagination)
-        response: DefaultResponse[Page[MeetResponseData]] = DefaultResponse.create_response(data=data)
+
+    data = await paginate(meets_response_data, pagination)
+    response: DefaultResponse[Page[MeetResponseData]] = DefaultResponse.create_response(data=data)
 
     return response
-
 
 
 @meet_router.get(path="/detail")
@@ -41,12 +40,11 @@ async def get_meet_detail(
 ) -> DefaultResponse[MeetResponseData]:
     meet_detail: Meet = await meet_service.get_meet_detail(meet_id=meet_id)
 
-
     if meet_detail.creator_id == user_id:
         meet_detail: Meet = await meet_service.get_my_meet_detail(meet_id=meet_id, user_id=user_id)
 
-    detail_response_data:MeetResponseData = domain_to_response(meet_detail)
-    response:DefaultResponse[MeetResponseData] = DefaultResponse.create_response(data=detail_response_data)
+    data: MeetResponseData = domain_to_response(meet_detail)
+    response: DefaultResponse[MeetResponseData] = DefaultResponse.create_response(data=data)
     return response
 
 
