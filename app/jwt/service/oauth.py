@@ -6,7 +6,6 @@ from fastapi.templating import Jinja2Templates
 from app.jwt.dto.kakao import mapping_access_token, KakaoAccessTokenResponse, KakaoUserResponse, mapping_user_data
 from app.jwt.dto.token import UserLoginInfo
 from app.jwt.service.service import JWTService
-from app.user.service.service import UserService
 from core.config.config import loader
 from core.utils import Singleton
 

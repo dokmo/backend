@@ -1,39 +1,49 @@
 import uuid
 from typing import List
 
+from fastapi_pagination import Params
+from fastapi_pagination.ext.sqlalchemy import paginate as sqlalchemy_paginate
 from sqlalchemy import select
 
 from app.meet.application.dto.meet_request import MeetJoinRequest, MeetCreateRequest, Operations
+from app.meet.application.dto.meet_response import MeetResponseData, domain_to_response
 from app.user.infrastructure.model.user import UserModel
 from app.meet.domain.meet import Meet
 from app.meet.infrastructure.model.meet import MeetModel, Participants
 from core.db.session import session_factory
 from core.utils import Singleton
+from fastapi_pagination import paginate
+
 
 class MeetRepository(metaclass=Singleton):
 
-    async def get_meets(self) -> List[Meet]:
+    async def get_meets(self, pagination: Params):
         query = (
-            select(MeetModel, UserModel)
+            select(MeetModel, UserModel.user_id)
             .join(UserModel, UserModel.id == MeetModel.creator_id)
             .order_by(MeetModel.created_at.desc())
         )
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
-        meets_and_users = result.all()
+            meets_and_users = result.scalars().all()
 
-        meets: List[Meet] = []
+        response_data: List[MeetResponseData] = []
+
         if len(meets_and_users) != 0:
-            for meet_model, user in meets_and_users:
-                meet = meet_model.to_domain(creator_id = user.user_id)
-                meets.append(meet)
+            for meet_model, users in meets_and_users:
+                meet = meet_model.to_domain(creator_id=users.user_id)
+                meet_response_data: MeetResponseData = domain_to_response(
+                    meet=meet
+                )
+                response_data.append(meet_response_data)
 
-        return meets
+        data = paginate(meets_and_users, pagination)
+        return data
 
-    async def get_my_meets(self, user_id:uuid.UUID) -> List[Meet]:
+    async def get_my_meets(self, pagination, user_id: uuid.UUID) -> List[MeetResponseData]:
         query = (
-            select(MeetModel, UserModel, Participants)
+            select(MeetModel, UserModel.user_id)
             .join(Participants, MeetModel.id == Participants.meet_id)
             .join(UserModel, Participants.user_id == UserModel.id)
             .where(UserModel.user_id == user_id)
@@ -42,17 +52,21 @@ class MeetRepository(metaclass=Singleton):
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
+            meets_and_users = result.scalars().all()
 
-        meet_models_and_users_and_participants = result.all()
+        response_data: List[MeetResponseData] = []
+        if len(meets_and_users) != 0:
+            for meet_model, users in meets_and_users:
+                meet = meet_model.to_domain(creator_id=users.user_id)
+                meet_response_data: MeetResponseData = domain_to_response(
+                    meet=meet
+                )
+                response_data.append(meet_response_data)
 
-        meets: List[Meet] = []
-        if len(meet_models_and_users_and_participants) != 0:
-            for meet_model, user, participants in meet_models_and_users_and_participants:
-                meet = meet_model.to_domain(creator_id = user.user_id)
-                meets.append(meet)
-        return meets
+        data = paginate(response_data, pagination)
+        return data
 
-    async def get_meet_detail(self, meet_id:uuid.UUID) -> Meet:
+    async def get_meet_detail(self, meet_id: uuid.UUID) -> Meet:
 
         query = (
             select(MeetModel, UserModel)
@@ -68,7 +82,7 @@ class MeetRepository(metaclass=Singleton):
 
         return meet
 
-    async def get_my_meet_detail(self, meet_id:uuid.UUID, user_id:uuid.UUID) -> Meet:
+    async def get_my_meet_detail(self, meet_id: uuid.UUID, user_id: uuid.UUID) -> Meet:
 
         query = (select(MeetModel, UserModel, Participants)
                  .join(UserModel, UserModel.user_id == user_id)
@@ -84,20 +98,24 @@ class MeetRepository(metaclass=Singleton):
 
         return meet
 
-    async def create_meet(self, request: MeetCreateRequest, create_id:uuid.UUID):
+    async def create_meet(self, request: MeetCreateRequest, create_id: uuid.UUID):
         query = select(UserModel).where(UserModel.user_id == create_id)
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
+            user = result.scalar()
 
-        user = result.scalars().one()
+        if user is None:
+            raise Exception("User not found")
+
         meet_model = MeetModel(
-            meet_id=request.meet_id,
+            meet_id=uuid.uuid4(),
             meet_name=request.meet_name,
             creator_id=user.id,
-            creator_name=request.creator_name,
+            creator_name=user.nickname,
             description=request.description
         )
+
         async with session_factory() as write_session:
             write_session.add(meet_model)
             await write_session.commit()
@@ -105,7 +123,6 @@ class MeetRepository(metaclass=Singleton):
     async def join_meet(self, request: MeetJoinRequest):
         user_query = select(UserModel).where(UserModel.user_id == request.target_user_id)
         meet_query = select(MeetModel).where(MeetModel.meet_id == request.meet_id)
-
 
         async with session_factory() as read_session:
             user_result = await read_session.execute(user_query)
@@ -132,7 +149,6 @@ class MeetRepository(metaclass=Singleton):
                 write_session.add(participants)
                 await write_session.commit()
 
-
     async def approve_or_decline_join(self, request: MeetJoinRequest):
         query = (
             select(MeetModel, UserModel)
@@ -145,7 +161,7 @@ class MeetRepository(metaclass=Singleton):
 
             meet_model, user_model = result.scalars().one()
             if meet_model is None:
-                return #FIXME
+                return  #FIXME
             elif user_model is None:
                 return
 

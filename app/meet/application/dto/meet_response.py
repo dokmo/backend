@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import List, Optional
 from uuid import UUID
 
+from fastapi_pagination.bases import BasePage
+
 from app.meet.domain.meet import Meet
 
 
@@ -30,3 +32,8 @@ def domain_to_response(meet:Meet) -> MeetResponseData:
     )
 
     return meet_response_data
+
+
+class PaginatedResponse(BasePage[MeetResponseData]):
+    items: List[MeetResponseData]
+    total: int
