@@ -1,17 +1,12 @@
-import uuid
-
 from fastapi import APIRouter, Request
 
 from api.v1.Response import DefaultResponse
 from api.v1.oauth.dto.token_response import TokenResponseData
 from app.jwt.dto.token import UserLoginInfo
 from app.jwt.service.oauth import KakaoAuthService
-from fastapi.responses import JSONResponse
-from app.jwt.decoder import AbstractJWTDecoder, JWTDecoder
-
 from app.user.service.service import UserService
+from fastapi.responses import JSONResponse
 
-decoder: AbstractJWTDecoder = JWTDecoder()
 kakao_router = APIRouter()
 kakao_oauth_service = KakaoAuthService()
 user_service = UserService()
@@ -22,12 +17,10 @@ async def kakao_callback(request: Request):
     host: str = request.client.host
     user_info: UserLoginInfo = await kakao_oauth_service.do_login(host=host, code=code)
 
-    payload = decoder.decode(token=user_info.access_token)
-    user_id = uuid.UUID(payload.get("user_id"))
 
-    is_user = user_service.find_user(user_id=user_id)
-    if is_user is None:
-        user_service.sign_up(user_id=user_id,
+    user = user_service.find_user(kakao_user_id=user_info.user_id)
+    if len(user) == 0:
+        user_service.sign_up(kakao_user_id=user_info.user_id,
                              nickname=user_info.user_name)
 
 

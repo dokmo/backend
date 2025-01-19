@@ -2,7 +2,6 @@ import uuid
 from typing import List
 
 from fastapi_pagination import Params
-from fastapi_pagination.ext.sqlalchemy import paginate as sqlalchemy_paginate
 from sqlalchemy import select
 
 from app.meet.application.dto.meet_request import MeetJoinRequest, MeetCreateRequest, Operations
@@ -41,7 +40,7 @@ class MeetRepository(metaclass=Singleton):
         data = paginate(meets_and_users, pagination)
         return data
 
-    async def get_my_meets(self, pagination, user_id: uuid.UUID) -> List[MeetResponseData]:
+    async def get_my_meets(self, pagination, user_id: uuid.UUID):
         query = (
             select(MeetModel, UserModel.user_id)
             .join(Participants, MeetModel.id == Participants.meet_id)
@@ -77,6 +76,7 @@ class MeetRepository(metaclass=Singleton):
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
+
         meet_model, user = result.all()
         meet: Meet = meet_model.to_domain(creator_id=user.user_id)
 
@@ -115,6 +115,14 @@ class MeetRepository(metaclass=Singleton):
             creator_name=user.nickname,
             description=request.description
         )
+
+        # meet_model = MeetModel(
+        #     meet_id=uuid.uuid4(),
+        #     meet_name=request.meet_name,
+        #     creator_id=user.id,
+        #     creator_name=user.nickname,
+        #     description=request.description
+        # )
 
         async with session_factory() as write_session:
             write_session.add(meet_model)

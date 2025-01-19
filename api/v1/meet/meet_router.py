@@ -33,8 +33,8 @@ async def get_meet_detail(
         meet_id: uuid.UUID,
         user_id: uuid.UUID = Depends(require_authorization)
 ) -> DefaultResponse[MeetResponseData]:
-    meet_detail: Meet = await meet_service.get_meet_detail(meet_id=meet_id)
 
+    meet_detail: Meet = await meet_service.get_meet_detail(meet_id=meet_id)
     if meet_detail.creator_id == user_id:
         meet_detail: Meet = await meet_service.get_my_meet_detail(meet_id=meet_id, user_id=user_id)
 
@@ -43,12 +43,11 @@ async def get_meet_detail(
     return response
 
 
-@meet_router.post(path="/")
+@meet_router.post(path="")
 async def create_meet(
         request_dto: MeetCreateRequest,
-        # user_id: uuid.UUID = Depends(require_authorization)
+        user_id: uuid.UUID = Depends(require_authorization)
 ):
-    user_id = uuid.uuid4()
     await meet_service.create_meet(request = request_dto, creator_id= user_id)
 
 
