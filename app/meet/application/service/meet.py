@@ -4,6 +4,7 @@ from typing import List
 from fastapi_pagination import Params
 
 from app.meet.application.dto.meet_request import MeetJoinRequest, MeetCreateRequest
+from app.meet.application.dto.meet_response import MeetResponseData
 from app.meet.domain.meet import Meet
 from app.meet.infrastructure.repository import MeetRepository
 from app.user.infrastructure.repository.user_repository import UserRepository
@@ -13,12 +14,12 @@ class MeetService(metaclass=Singleton):
     def __init__(self):
         self.__meet_repository = MeetRepository()
 
-    async def get_meets(self, pagination: Params) -> List[Meet]:
-        meets: List[Meet] = await self.__meet_repository.get_meets(pagination=pagination)
+    async def get_meets(self, pagination: Params):
+        meets: List[MeetResponseData] = await self.__meet_repository.get_meets(pagination=pagination)
         return meets
 
-    async def get_my_meets(self, pagination: Params, user_id: uuid.UUID) -> List[Meet]:
-        meets: List[Meet] = await self.__meet_repository.get_my_meets(pagination=pagination, user_id=user_id)
+    async def get_my_meets(self, pagination: Params, user_id: uuid.UUID):
+        meets: List[MeetResponseData] = await self.__meet_repository.get_my_meets(pagination=pagination, user_id=user_id)
         return meets
 
     async def get_meet_detail(self, meet_id: uuid.UUID) -> Meet:

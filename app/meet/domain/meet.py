@@ -15,4 +15,3 @@ class Meet:
         self.creator_name: str = creator_name
         self.description: str = description
         self.participants: List[int] = participants
-

@@ -9,24 +9,25 @@ from core.utils import Singleton
 
 class UserRepository(metaclass=Singleton):
 
-    async def get_user(self, user_id: uuid.UUID):
+    async def find_user(self, kakao_user_id: int):
         query = (
             select(UserModel)
-            .filter(UserModel.user_id == user_id)
+            .filter(UserModel.kakao_id == kakao_user_id)
         )
 
         async with session_factory() as session:
             result = await session.execute(query)
-            user = result.scalars().one()
+            user = result.scalars().first()
             return user
 
-    async def sign_up(self, request):
+    async def sign_up(self, kakao_user_id:int, nickname:str):
 
         user = UserModel(
-            user_id=request.user_id,
-            nickname=request.nickname
+            kakao_id=kakao_user_id,
+            nickname=nickname
         )
         async with session_factory() as session:
             session.add(user)
             await session.commit()
             return user
+

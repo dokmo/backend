@@ -6,13 +6,8 @@ from fastapi.templating import Jinja2Templates
 from app.jwt.dto.kakao import mapping_access_token, KakaoAccessTokenResponse, KakaoUserResponse, mapping_user_data
 from app.jwt.dto.token import UserLoginInfo
 from app.jwt.service.service import JWTService
-from app.user.service.service import UserService
 from core.config.config import loader
 from core.utils import Singleton
-
-# Jinja2 템플릿 설정
-templates = Jinja2Templates(directory="templates")
-
 
 
 class KakaoAuthService(metaclass=Singleton):
@@ -25,16 +20,15 @@ class KakaoAuthService(metaclass=Singleton):
         self.__logout_redirect_uri:str = loader.config.KAKAO_LOGOUT_REDIRECT_URI
         self.__scope: str = "profile_nickname, profile_image"
         self.__jwt_token_service = JWTService()
-        # self.__user_service = UserService()
 
     def __code_auth_url(self, host: str) -> str:
         return f'https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={self.__rest_api_key}&redirect_uri={self.__get_redirect_uri(host=host)}&scope={self.__scope}'
 
     def __get_redirect_uri(self, host: str) -> str:
         if host == '127.0.0.1':
-            return self.__prod_redirect_uri
-        else:
             return self.__local_redirect_uri
+        else:
+            return self.__prod_redirect_uri
 
     def __is_success_response(self, http_status_code: int) -> bool:
         return 200 <= http_status_code < 400
@@ -44,17 +38,16 @@ class KakaoAuthService(metaclass=Singleton):
         if token is None:
             raise ValueError("Failed to acquire Kakao access token.")
 
-        user_info: Optional[KakaoUserResponse] = await self.__get_user_info(access_token=token.access_token)
-        if user_info is None:
+        user_info_from_kakao: Optional[KakaoUserResponse] = await self.__get_user_info_from_kakao(access_token=token.access_token)
+        if user_info_from_kakao is None:
             raise ValueError("Failed to retrieve user information from Kakao.")
 
-        jwt_access_token = self.__jwt_token_service.create_access_token(data={"user_id": user_info.id})
-        jwt_refresh_token = self.__jwt_token_service.create_refresh_token(data={"user_id": user_info.id})
+        jwt_access_token = self.__jwt_token_service.create_access_token(data={"user_id": user_info_from_kakao.id})
+        jwt_refresh_token = self.__jwt_token_service.create_refresh_token(data={"user_id": user_info_from_kakao.id})
 
-        #TODO User database update
         return UserLoginInfo(access_token=jwt_access_token,
                              refresh_token=jwt_refresh_token,
-                             user_id=user_info.id, user_name=user_info.properties.nickname)
+                             user_id=user_info_from_kakao.id, user_name=user_info_from_kakao.properties.nickname)
 
     async def __get_access_token(self, code:str, host: str) -> Optional[KakaoAccessTokenResponse]:
         token_request_url = 'https://kauth.kakao.com/oauth/token'
@@ -70,7 +63,7 @@ class KakaoAuthService(metaclass=Singleton):
             response = await client.post(url = token_request_url, data=token_request_payload)
         return mapping_access_token(response_json=response.json()) if self.__is_success_response(response.status_code) else None
 
-    async def __get_user_info(self, access_token: str) -> Optional[KakaoUserResponse]:
+    async def __get_user_info_from_kakao(self, access_token: str) -> Optional[KakaoUserResponse]:
         userinfo_endpoint = 'https://kapi.kakao.com/v2/user/me'
         headers = {'Authorization': f'Bearer {access_token}'}
 

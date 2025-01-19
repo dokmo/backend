@@ -1,8 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends
-from fastapi_pagination import Page, Params
-from starlette.responses import JSONResponse
+from fastapi_pagination import Params
 
 from api.v1.Response import DefaultResponse
 from app.meet.application.dto.meet_request import MeetCreateRequest, MeetJoinRequest
@@ -10,8 +9,6 @@ from app.meet.application.dto.meet_response import MeetResponseData, domain_to_r
 from app.meet.application.service.meet import MeetService
 from app.meet.domain.meet import Meet
 from core.fastapi.jwt_verifier import try_validate_token, require_authorization
-
-import json
 
 meet_router = APIRouter()
 meet_service = MeetService()
@@ -26,11 +23,6 @@ async def get_meets(
     else:
         meets = await meet_service.get_my_meets(pagination=pagination, user_id=user_id)
 
-    # meets_response_data: List[MeetResponseData] = []
-    # if len(meets) != 0:
-    #     meets_response_data: List[MeetResponseData] = [domain_to_response(meet) for meet in meets]
-
-    # data = await paginate(meets_response_data, pagination)
     response: DefaultResponse = DefaultResponse.create_response(data=meets)
 
     return response
@@ -41,8 +33,8 @@ async def get_meet_detail(
         meet_id: uuid.UUID,
         user_id: uuid.UUID = Depends(require_authorization)
 ) -> DefaultResponse[MeetResponseData]:
-    meet_detail: Meet = await meet_service.get_meet_detail(meet_id=meet_id)
 
+    meet_detail: Meet = await meet_service.get_meet_detail(meet_id=meet_id)
     if meet_detail.creator_id == user_id:
         meet_detail: Meet = await meet_service.get_my_meet_detail(meet_id=meet_id, user_id=user_id)
 
@@ -51,7 +43,7 @@ async def get_meet_detail(
     return response
 
 
-@meet_router.post(path="/")
+@meet_router.post(path="")
 async def create_meet(
         request_dto: MeetCreateRequest,
         user_id: uuid.UUID = Depends(require_authorization)
