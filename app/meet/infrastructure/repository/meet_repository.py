@@ -18,31 +18,31 @@ class MeetRepository(metaclass=Singleton):
 
     async def get_meets(self, pagination: Params):
         query = (
-            select(MeetModel, UserModel.user_id)
+            select(MeetModel, UserModel.id)
             .join(UserModel, UserModel.id == MeetModel.creator_id)
             .order_by(MeetModel.created_at.desc())
         )
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
-            meets_and_users = result.scalars().all()
+            meets_and_users = result.fetchall()
 
         response_data: List[MeetResponseData] = []
 
         if len(meets_and_users) != 0:
-            for meet_model, users in meets_and_users:
-                meet = meet_model.to_domain(creator_id=users.user_id)
+            for meet_model, users_id in meets_and_users:
+                meet: Meet = meet_model.to_domain(creator_id=users_id)
                 meet_response_data: MeetResponseData = domain_to_response(
                     meet=meet
                 )
                 response_data.append(meet_response_data)
 
-        data = paginate(meets_and_users, pagination)
+        data = paginate(response_data, pagination)
         return data
 
     async def get_my_meets(self, pagination, user_id: uuid.UUID):
         query = (
-            select(MeetModel, UserModel.user_id)
+            select(MeetModel, UserModel.id)
             .join(Participants, MeetModel.id == Participants.meet_id)
             .join(UserModel, Participants.user_id == UserModel.id)
             .where(UserModel.user_id == user_id)
@@ -51,12 +51,12 @@ class MeetRepository(metaclass=Singleton):
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
-            meets_and_users = result.scalars().all()
+            meets_and_users = result.fetchall()
 
         response_data: List[MeetResponseData] = []
         if len(meets_and_users) != 0:
-            for meet_model, users in meets_and_users:
-                meet = meet_model.to_domain(creator_id=users.user_id)
+            for meet_model, users_id in meets_and_users:
+                meet: Meet = meet_model.to_domain(creator_id=users_id)
                 meet_response_data: MeetResponseData = domain_to_response(
                     meet=meet
                 )
@@ -68,7 +68,7 @@ class MeetRepository(metaclass=Singleton):
     async def get_meet_detail(self, meet_id: uuid.UUID) -> Meet:
 
         query = (
-            select(MeetModel, UserModel)
+            select(MeetModel, UserModel.id)
             .join(UserModel, UserModel.id == MeetModel.creator_id)
             .where(MeetModel.meet_id == meet_id)
             .order_by(MeetModel.created_at.desc())
@@ -76,9 +76,9 @@ class MeetRepository(metaclass=Singleton):
 
         async with session_factory() as read_session:
             result = await read_session.execute(query)
+            meet_model, user_id = result.all()
 
-        meet_model, user = result.all()
-        meet: Meet = meet_model.to_domain(creator_id=user.user_id)
+        meet: Meet = meet_model.to_domain(creator_id=user_id)
 
         return meet
 
@@ -108,24 +108,37 @@ class MeetRepository(metaclass=Singleton):
         if user is None:
             raise Exception("User not found")
 
+        meet_id = uuid.uuid4()
         meet_model = MeetModel(
-            meet_id=uuid.uuid4(),
+            meet_id=meet_id,
             meet_name=request.meet_name,
             creator_id=user.id,
             creator_name=user.nickname,
             description=request.description
         )
 
-        # meet_model = MeetModel(
-        #     meet_id=uuid.uuid4(),
-        #     meet_name=request.meet_name,
-        #     creator_id=user.id,
-        #     creator_name=user.nickname,
-        #     description=request.description
-        # )
-
         async with session_factory() as write_session:
             write_session.add(meet_model)
+            await write_session.commit()
+
+        query = (
+            select(MeetModel)
+            .filter(MeetModel.meet_id == meet_id)
+        )
+
+        async with session_factory() as read_session:
+            result = await read_session.execute(query)
+            meet_model = result.scalars().one()
+
+
+        participants_model = Participants(
+            meet_id=meet_model.id,
+            user_id=user.id,
+            approval=Operations.ACCEPT
+        )
+
+        async with session_factory() as write_session:
+            write_session.add(participants_model)
             await write_session.commit()
 
     async def join_meet(self, request: MeetJoinRequest):

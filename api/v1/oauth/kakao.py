@@ -6,6 +6,7 @@ from app.jwt.dto.token import UserLoginInfo
 from app.jwt.service.oauth import KakaoAuthService
 from app.user.service.service import UserService
 from fastapi.responses import JSONResponse
+from app.user.domain.user import User
 
 kakao_router = APIRouter()
 kakao_oauth_service = KakaoAuthService()
@@ -17,10 +18,9 @@ async def kakao_callback(request: Request):
     host: str = request.client.host
     user_info: UserLoginInfo = await kakao_oauth_service.do_login(host=host, code=code)
 
-
-    user = user_service.find_user(kakao_user_id=user_info.user_id)
-    if len(user) == 0:
-        user_service.sign_up(kakao_user_id=user_info.user_id,
+    user: User = await user_service.find_user_by_kakao_id(kakao_id=user_info.user_id)
+    if user is None:
+        await user_service.sign_up(kakao_user_id=user_info.user_id,
                              nickname=user_info.user_name)
 
 
