@@ -1,7 +1,6 @@
 from typing import Optional
 
 import httpx
-from fastapi.templating import Jinja2Templates
 
 from app.jwt.dto.kakao import mapping_access_token, KakaoAccessTokenResponse, KakaoUserResponse, mapping_user_data
 from app.jwt.dto.token import UserLoginInfo
@@ -36,7 +35,7 @@ class KakaoAuthService(metaclass=Singleton):
     async def do_login(self, host: str, code: str) -> UserLoginInfo:
         token : Optional[KakaoAccessTokenResponse] = await self.__get_access_token(code=code, host=host)
         if token is None:
-            raise ValueError("Failed to acquire Kakao access token.")
+             raise ValueError("Failed to acquire Kakao access token.")
 
         user_info_from_kakao: Optional[KakaoUserResponse] = await self.__get_user_info_from_kakao(access_token=token.access_token)
         if user_info_from_kakao is None:

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # FastAPI 애플리케이션 컨테이너
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dokmo
+    ports:
+      - "80:80"  # 외부에서 접근할 포트
+    environment:
+      ENV: ${ENV:-local}  # ENV 환경 변수를 지정, 기본 값은 "local"
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: ${DATABASE_HOST}  # 이미 돌아가고 있는 MariaDB 인스턴스의 호스트
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_PORT: ${DATABASE_PORT}
+      SECRET_KEY: ${SECRET_KEY}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
+      KAKAO_LOCAL_REDIRECT_URI: ${KAKAO_LOCAL_REDIRECT_URI}
+      KAKAO_PROD_REDIRECT_URI: ${KAKAO_PROD_REDIRECT_URI}
+      KAKAO_LOGOUT_REDIRECT_URI: ${KAKAO_LOGOUT_REDIRECT_URI}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_MINUTES: ${REFRESH_TOKEN_EXPIRE_MINUTES}

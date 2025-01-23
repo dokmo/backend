@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from pydantic import ValidationError
+from pydantic import ValidationError, BaseModel
 from typing import Optional
 
 
@@ -9,7 +9,7 @@ class KakaoUserData():
     id: int
     nickname: str
 
-class KakaoAccessTokenResponse():
+class KakaoAccessTokenResponse(BaseModel):
     token_type: str
     access_token: str
     id_token: Optional[str] = None
@@ -18,12 +18,12 @@ class KakaoAccessTokenResponse():
     refresh_token_expires_in: int
     scope: Optional[str] = None
 
-class KakaoProperties():
+class KakaoProperties(BaseModel):
     nickname: Optional[str] = None
     profile_image: Optional[str] = None
     thumbnail_image: Optional[str] = None
 
-class KakaoUserResponse():
+class KakaoUserResponse(BaseModel):
     id: int
     properties: Optional[KakaoProperties] = None
 

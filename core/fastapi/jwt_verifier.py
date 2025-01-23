@@ -56,7 +56,7 @@ async def require_authorization(request: Request):
     token = auth_header[len("Bearer "):]
     try:
         payload = decoder.decode(token=token)
-        return uuid.UUID(payload.get("user_id", None))
+        return uuid.UUID(int = payload.get("user_id", 0))
     except JWTError as e:
         raise HTTPException(status_code=401, detail=f"Invalid or expired token: {str(e)}")
 
@@ -85,6 +85,6 @@ async def try_validate_token (request: Request):
     token = auth_header[len("Bearer "):]
     try:
         payload = decoder.decode(token=token)
-        return uuid.UUID(payload.get("user_id"))
+        return uuid.UUID(int=payload.get("user_id", 0))
     except JWTError as e:
         return None
