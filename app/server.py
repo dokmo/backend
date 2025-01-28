@@ -63,13 +63,8 @@ async def lifespan(_app: FastAPI):
 
 async def initialize_database_tables():
     engine: AsyncEngine = engines[EngineType.WRITER]
-    # print("create tables")
-    try:
-        async with engine.begin() as connection:
-            await connection.run_sync(Base.metadata.create_all)
-            print("create tables")
-    except Exception as e:
-        print(f"initialize_database_tables, Error: {e}")
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
 
 
 app = init_app()
