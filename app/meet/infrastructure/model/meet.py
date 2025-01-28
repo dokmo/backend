@@ -15,7 +15,7 @@ class Participants(Base, TimeStamp):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     meet_id: Mapped[int] = mapped_column(nullable=False)
     user_id: Mapped[int] = mapped_column(nullable=False)
-    approval: Mapped[str] = mapped_column(String, nullable=False)
+    approval: Mapped[str] = mapped_column(String(4096), nullable=False)
 
 
 class MeetModel(Base, TimeStamp):
@@ -23,10 +23,10 @@ class MeetModel(Base, TimeStamp):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     meet_id: Mapped[UUID] = mapped_column(unique=True)
-    meet_name: Mapped[str] = mapped_column(String, nullable=False)
+    meet_name: Mapped[str] = mapped_column(String(256), nullable=False)
     creator_id: Mapped[int] = mapped_column(nullable=False)
-    creator_name: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[str | None] = mapped_column(String, nullable=True)
+    creator_name: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(4096), nullable=True)
 
     @classmethod
     def from_domain(cls, *, meet: Meet):
