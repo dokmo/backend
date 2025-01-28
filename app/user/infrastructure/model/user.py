@@ -1,4 +1,4 @@
-from sqlalchemy import Integer
+from sqlalchemy.dialects.mysql import BIGINT
 
 from app.user.domain.user import User
 from core.db import TimeStamp, Base
@@ -11,9 +11,9 @@ from uuid import UUID
 class UserModel(Base, TimeStamp):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    kakao_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    kakao_id: Mapped[int] = mapped_column(BIGINT, nullable=False)
     user_id: Mapped[UUID] = mapped_column(unique=True)
-    nickname: Mapped[str] = mapped_column(String, nullable=False)
+    nickname: Mapped[str] = mapped_column(String(256), nullable=False)
 
 
     def to_domain(self):
